@@ -13,17 +13,41 @@ Versioning
 `pbr`, when run in a git repo, derives the version of a package from the
 git tags. When run in a tarball with a proper egg-info dir, it will happily
 pull the version from that. So for the most part, the package maintainers
-shouldn't need to care. However, if you are doing something like keeping a
-git repo with the sources and the packaging intermixed and it's causing pbr
-to get confused about whether its in its own git repo or not, you can set
-`PBR_VERSION`:
+shouldn't need to care.
+
+However, if you are doing something like keeping a git repo with the sources
+and the packaging intermixed and it's causing pbr to get confused about whether
+its in its own git repo or not (error about no access to an upstream git
+repository, you can set an environment variable to set the version of a specific
+package. This can be useful for example in a docker build done inside a
+Continuous Integration system (in this case, the CI handle the checkout of the
+code and the docker build might not have access to upstream git).
+
+This environment variable has the following form:
+
+::
+
+    PBR_<PACKAGE NAME IN UPPER CASE>_FALLBACK_VERSION
+
+For example, given a package named "mypackage, the fallback version environment
+variable would be:
+
+::
+
+    PBR_MYPACKAGE_FALLBACK_VERSION=1.2.3
+
+Please note this only act as a last resort mecanism, if the package has been
+installed from an sdist/wheel and the version metadata are present, they will
+still be used.
+
+To disable completely all version calculation done by PBR on all packages, you
+can set `PBR_VERSION`:
 
 ::
 
   PBR_VERSION=1.2.3
 
-and all version calculation logic will be completely skipped and the supplied
-version will be considered absolute.
+and the supplied version will be considered absolute.
 
 Distribution version numbers
 ============================

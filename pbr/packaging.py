@@ -784,6 +784,10 @@ def get_version(package_name, pre_version=None):
         version = version.encode('utf-8')
     if version:
         return version
+    version = os.environ.get("PBR_" + package_name.upper() +
+                             "_FALLBACK_VERSION", None)
+    if version:
+        return version
     raise Exception("Versioning for this project requires either an sdist"
                     " tarball, or access to an upstream git repository."
                     " It's also possible that there is a mismatch between"
