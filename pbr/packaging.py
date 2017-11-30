@@ -767,12 +767,12 @@ def get_version(package_name, pre_version=None):
     :param pre_version: The version field from setup.cfg - if set then this
         version will be the next release.
     """
+    version = _get_version_from_pkg_metadata(package_name)
+    if version:
+        return version
     version = os.environ.get(
         "PBR_VERSION",
         os.environ.get("OSLO_PACKAGE_VERSION", None))
-    if version:
-        return version
-    version = _get_version_from_pkg_metadata(package_name)
     if version:
         return version
     version = _get_version_from_git(pre_version)
