@@ -36,3 +36,5 @@ ChangeLog
 # Editor files
 *~
 *.swp
+
+pbr/tests/testpipfilepackage/Pipfile.lock
