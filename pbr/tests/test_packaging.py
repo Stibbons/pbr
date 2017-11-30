@@ -513,6 +513,16 @@ class TestNestedRequirements(base.BaseTestCase):
         self.assertEqual(['pbr'], result)
 
 
+class TestPipfileRequirements(base.BaseTestCase):
+
+    def test_pipfilerequirement(self):
+        pipfile_path = os.path.join(os.path.join(os.path.dirname(__file__),
+                                                 'testpipfilepackage',
+                                                 'Pipfile'))
+        result = packaging.parse_requirements([pipfile_path])
+        self.assertEqual(['toml'], result)
+
+
 class TestVersions(base.BaseTestCase):
 
     scenarios = [

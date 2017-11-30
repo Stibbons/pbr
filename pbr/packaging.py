@@ -41,8 +41,17 @@ from pbr import extra_files
 from pbr import git
 from pbr import options
 import pbr.pbr_json
+from pbr import pipfile
 from pbr import testr_command
 from pbr import version
+
+try:
+    # Python 2
+    basestring
+except NameError:
+    # Python 3
+    basestring = str
+
 
 REQUIREMENTS_FILES = ('requirements.txt', 'tools/pip-requires')
 TEST_REQUIREMENTS_FILES = ('test-requirements.txt', 'tools/test-requires')
@@ -83,10 +92,83 @@ def get_reqs_from_files(requirements_files):
     return []
 
 
+def parse_pipfile(pipfile_path=None):
+    """Parse a pipfile if present
+
+    Returns None if no Pipfile is found.
+    Returns an empty list if a Pipfile is found but no dependency are found.
+    Returns a list of dependencies if found
+    """
+    if pipfile_path is None:
+        pipfile_path = "Pipfile"
+    if not os.path.exists(pipfile_path):
+        return None
+    pfl = pipfile.load(pipfile_path)
+    requirements = []
+    for pkg_name, pkg_cfg in pfl.data.get("default", {}).items():
+        if isinstance(pkg_cfg, basestring):
+            pkg_cfg = pkg_cfg.strip()
+            if not pkg_cfg or pkg_cfg == "*":
+                requirements.append(pkg_name)
+            else:
+                requirements.append(pkg_name + pkg_cfg)
+            # TODO(stibbons): support markers
+        else:
+            # pkg_cfg is a dict
+            git = pkg_cfg.get("git")
+            editable = pkg_cfg.get("editable")
+            path = pkg_cfg.get("path")
+            fil = pkg_cfg.get("file")
+            version = pkg_cfg.get("version")
+            ref = pkg_cfg.get("ref")
+            if version:
+                version = version.strip()
+                if version == "*":
+                    version = None
+            if fil:
+                # TODO(stibbons): support 'file' key (zipfile)
+                # requirements.append(fil)
+                continue
+            if editable:
+                line = "-e "
+            else:
+                line = ""
+            if git:
+                if ref:
+                    line += "git+{0}@{1}#{1}".format(git, ref, pkg_name)
+                else:
+                    line += "git+{0}#{1}".format(git, pkg_name)
+                requirements.append(line)
+            elif path:
+                line += path
+                # pip does not support egg name in local path installation
+                requirements.append(line)
+            else:
+                line += pkg_name
+                if version:
+                    line += version
+                requirements.append(line)
+            # TODO(stibbons): support for the following keys:
+            #   - extras
+            #   - os_name
+            #   - index (and so other than pypi)
+            #   - markers
+    return requirements
+
+
 def parse_requirements(requirements_files=None, strip_markers=False):
 
     if requirements_files is None:
         requirements_files = get_requirements_files()
+
+    for requirements_file in requirements_files:
+        if os.path.basename(requirements_file) == "Pipfile":
+            requirements = parse_pipfile(requirements_file)
+            break
+    else:
+        requirements = parse_pipfile()
+    if requirements is not None:
+        return requirements
 
     def egg_fragment(match):
         # take a versioned egg fragment and return a
