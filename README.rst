@@ -1,6 +1,9 @@
 Introduction
 ============
 
+THIS IS A TEMPORARY FORK ONLY UNTIL DOCKER/SUBMODULES PATCHES ARE ACCEPTED
+IN TRUNK
+
 .. image:: https://img.shields.io/pypi/v/pbr.svg
     :target: https://pypi.python.org/pypi/pbr/
     :alt: Latest Version
