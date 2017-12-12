@@ -140,9 +140,9 @@ def parse_pipfile(pipfile_path=None):
                     line += "git+{0}#{1}".format(git, pkg_name)
                 requirements.append(line)
             elif path:
-                line += path
                 # pip does not support egg name in local path installation
-                requirements.append(line)
+                # so we cannot install a dependency in this format
+                continue
             else:
                 line += pkg_name
                 if version:
