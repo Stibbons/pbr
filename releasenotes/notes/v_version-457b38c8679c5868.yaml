@@ -1,0 +1,5 @@
+---
+upgrade:
+  - |
+    Support version parsing of git tag with the v<semver> pattern, in addition
+    to <semver>
